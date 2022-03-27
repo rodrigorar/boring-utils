@@ -1,4 +1,4 @@
-package com.rodrigorar.guards;
+package com.rodrigorar;
 
 public class TestException extends RuntimeException {
 

@@ -1,6 +1,6 @@
 package com.rodrigorar.results;
 
-import com.rodrigorar.helpers.NotImplementedException;
+import com.rodrigorar.guards.GuardArguments;
 
 import java.util.function.Function;
 
@@ -14,15 +14,12 @@ public class Either<L, R> {
     }
 
     public static <L, R> Either<L, R> left(L leftValue) {
-        // TODO: Add some sort of null guard for left value
-
+        GuardArguments.NotNullOrThrow(leftValue);
         return new Either<L, R>(leftValue, null);
     }
 
-    public static <L, R> Either<L, R> right(R rightValue) {
-        // TODO: Add some sort of null guard for left value
-
-        return new Either<L, R>(null, rightValue);
+    public L getLeft() {
+        return _leftValue;
     }
 
     public boolean isLeft() {
@@ -30,18 +27,21 @@ public class Either<L, R> {
     }
 
     public <T> Either<T, R> mapLeft(Function<L, T> mappingFunction) {
-        T leftResult = mappingFunction.apply(_leftValue);
-        return new Either<>(leftResult, null);
+        final T leftResult = mappingFunction.apply(_leftValue);
+        return Either.left(leftResult);
     }
 
     public <T> Either<T, R> flatMapLeft(Function<L, Either<T, R>> mappingFunction) {
-        // TODO: Not implemented
-        throw new NotImplementedException("Either#flatMapLeft");
+        return mappingFunction.apply(_leftValue);
     }
 
-    public <T> T foldLeft(Function<L, R> foldingFunction) {
-        // TODO: Not implemented
-        throw new NotImplementedException("Either#foldLeft");
+    public static <L, R> Either<L, R> right(R rightValue) {
+        GuardArguments.NotNullOrThrow(rightValue);
+        return new Either<L, R>(null, rightValue);
+    }
+
+    public R getRight() {
+        return _rightValue;
     }
 
     public boolean isRight() {
@@ -49,27 +49,31 @@ public class Either<L, R> {
     }
 
     public <T> Either<L, T> mapRight(Function<R, T> mappingFunction) {
-        T rightResult = mappingFunction.apply(_rightValue);
-        return new Either<>(null, rightResult);
+        final T rightResult = mappingFunction.apply(_rightValue);
+        return Either.right(rightResult);
     }
 
-    public <T> Either<L, T> flatMapRight(Function<Either<L, T>, R> mappingFunction) {
-        // TODO: Not implemented
-        throw new NotImplementedException("Either#flatMapRight");
-    }
-
-    public <T> T foldRight(Function<R, T> foldingFunction) {
-        // TODO: Not implemented
-        throw new NotImplementedException("Either#foldRight");
+    public <T> Either<L, T> flatMapRight(Function<R, Either<L, T>> mappingFunction) {
+        return mappingFunction.apply(_rightValue);
     }
 
     public <T> T fold(Function<L, T> leftFunction, Function<R, T> rightFunction) {
-        // TODO: Not implemented
-        throw new NotImplementedException("Either#fold");
+        final T result;
+        if (isRight()) {
+            result = rightFunction.apply(_rightValue);
+        } else {
+            result = leftFunction.apply(_leftValue);
+        }
+        return result;
     }
 
     public Either<R, L> swap() {
-        // TODO: Not implemented
-        throw new NotImplementedException("Either#swap");
+        final Either<R, L> result;
+        if (isRight()) {
+            result = Either.left(_rightValue);
+        } else {
+            result = Either.right(_leftValue);
+        }
+        return result;
     }
 }
